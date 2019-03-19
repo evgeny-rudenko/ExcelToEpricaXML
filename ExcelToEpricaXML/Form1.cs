@@ -151,41 +151,46 @@ namespace ExcelToEpricaXML
                 */
                 #endregion
                 writer.WriteStartElement("ROWS");
-                for (int index = 14; index <= 1500; index++)
+                for (int index = 14; index <= 2500; index++)
                 {
-                    
-                    String GoodName = ErSheet.get_Range("A" + index.ToString(), "A" + index.ToString()).Cells.Value;
-                    if (GoodName == "")
+                    progressBar1.Value = index;
+                    float remain;
+                    float min;
+                    Excel.Range GoodName = ErSheet.get_Range("A" + index.ToString(), "A" + index.ToString());
+                    if (GoodName.Text == ""||GoodName.Text==" ")
                         continue;
+
                     Excel.Range rngremain = ErSheet.get_Range("C" + index.ToString(), "C" + index.ToString());
-                    if (rngremain.Text == "")
-                        continue;
-                    float remain = float.Parse(rngremain.Text);
+                    if (rngremain.Text == "" || rngremain.Text ==" ")
+                        remain = 0;
+                    else
+                        remain = float.Parse(rngremain.Text);
 
 
-                    Excel.Range rngmin = ErSheet.get_Range("F" + index.ToString(), "F" + index.ToString());
-                    if (rngmin.Text == "")
-                        continue;
-                    float min = float.Parse(rngmin.Text);
+                    Excel.Range rngmin = ErSheet.get_Range("B" + index.ToString(), "B" + index.ToString());
+                    if ( rngmin.Text == "" || rngmin.Text == " ")
+                        min = 0;
+                    else
+                        min = float.Parse(rngmin.Text);
 
 
                     writer.WriteStartElement("ROW");
                     writer.WriteElementString("ID_GOODS_GLOBAL", System.Guid.NewGuid().ToString());
-                    writer.WriteElementString("GOODS_NAME", GoodName);
+                    writer.WriteElementString("GOODS_NAME", GoodName.Text);
                     writer.WriteElementString("PRODUCER_NAME", "Производитель");
 
                     
-                    writer.WriteElementString("QTY_REMAIN", remain.ToString().Replace(",","."));
+                    writer.WriteElementString("QTY_REMAIN", remain.ToString("0.0000").Replace(",","."));
 
 
-                    writer.WriteElementString("QTY_MIN", min.ToString().Replace(",","."));
+                    writer.WriteElementString("QTY_MIN", min.ToString("0.0000").Replace(",", "."));
 
                     writer.WriteElementString("LAST_PRICE_SAL", "0.000");
                     writer.WriteElementString("LAST_PRICE_SUP", "0.000");
                     writer.WriteElementString("LAST_SUPPLIER_NAME", "Поставщик");
                     writer.WriteEndElement();
 
-                    progressBar1.Value = index;
+                   
 
 
                    

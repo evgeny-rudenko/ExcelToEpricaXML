@@ -52,8 +52,8 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(199, 20);
             this.textBox1.TabIndex = 1;
-            this.textBox1.Text = "C:\\Users\\evgeny\\source\\repos\\ExcelToEpricaXML\\ExcelToEpricaXML\\bin\\Debug\\заказ.xl" +
-    "s";
+            this.textBox1.Text = "C:\\Users\\evgeny\\source\\repos\\ExcelToEpricaXML\\ExcelToEpricaXML\\bin\\Debug\\19.03 то" +
+    "лько заказ.xls";
             // 
             // button1
             // 
@@ -68,7 +68,7 @@
             // progressBar1
             // 
             this.progressBar1.Location = new System.Drawing.Point(16, 197);
-            this.progressBar1.Maximum = 1500;
+            this.progressBar1.Maximum = 2500;
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(196, 23);
             this.progressBar1.TabIndex = 3;
