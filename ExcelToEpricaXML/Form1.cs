@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Xml;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ExcelToEpricaXML
 {
@@ -21,6 +22,27 @@ namespace ExcelToEpricaXML
         private static Excel.Application MyApp = null;
         private static Excel.Worksheet ErSheet = null;
 
+        public float GetNumber (string str)
+        {
+            str = Regex.Replace(str, @"[^0-9.,]", "");
+            str = str.Replace(".",",");
+
+            if (str == "")
+                return 0;
+            else
+            {
+                /// все равно встречаются дикие случаи, когда ставят в ячейки например ,,ъ
+                /// проще сдлать обработку ошибок
+                try
+                {
+                    return float.Parse(str);
+                }
+                catch (Exception e)
+                {
+                    return 0;
+                }
+            }         
+        }
 
         /// <summary>
         /// Функция необходима для того, чтобы убать первую строчку  описания XML. 
@@ -103,7 +125,7 @@ namespace ExcelToEpricaXML
                 return;
             }
             XmlWriterSettings settingsxml = new XmlWriterSettings();
-            String defpath = "defektura.xml";
+            String defpath = "defektura_"+txtApteka.Text+ ".xml";
 
 
             settingsxml.Indent = true;
@@ -122,7 +144,7 @@ namespace ExcelToEpricaXML
 
             */
             #endregion 
-            using (XmlWriter writer = XmlWriter.Create("defektura.xml", settingsxml))
+            using (XmlWriter writer = XmlWriter.Create(defpath, settingsxml))
             {
                 writer.WriteStartElement("XML");
                 writer.WriteStartElement("HEADER");
@@ -130,7 +152,7 @@ namespace ExcelToEpricaXML
                 writer.WriteElementString("ID_DEFECTURA",System.Guid.NewGuid().ToString());
                 writer.WriteElementString("DOC_DATE", DateTime.Now.ToString("yyyy-MM-ddThh:mm:ss"));
                 writer.WriteElementString("ID_CONTRACTOR_GLOBAL", "1fb6f806-63bc-4ef0-afca-736c5dc1e7fa");
-                writer.WriteElementString("CONTRACTOR_NAME","ООО Здоровье");
+                writer.WriteElementString("CONTRACTOR_NAME","ООО Здоровье "+ txtApteka.Text);
                 writer.WriteElementString("CONTRACTOR_CODE","");
                 writer.WriteEndElement();
                 writer.WriteEndElement();
@@ -156,23 +178,19 @@ namespace ExcelToEpricaXML
                     progressBar1.Value = index;
                     float remain;
                     float min;
+                    float z;
                     Excel.Range GoodName = ErSheet.get_Range("A" + index.ToString(), "A" + index.ToString());
                     if (GoodName.Text == ""||GoodName.Text==" ")
                         continue;
 
                     Excel.Range rngremain = ErSheet.get_Range("C" + index.ToString(), "C" + index.ToString());
-                    if (rngremain.Text == "" || rngremain.Text ==" ")
-                        remain = 0;
-                    else
-                        remain = float.Parse(rngremain.Text);
-
-
+                    remain = GetNumber(rngremain.Text);
+                    
                     Excel.Range rngmin = ErSheet.get_Range("B" + index.ToString(), "B" + index.ToString());
-                    if ( rngmin.Text == "" || rngmin.Text == " ")
-                        min = 0;
-                    else
-                        min = float.Parse(rngmin.Text);
+                    min = GetNumber(rngmin.Text);
 
+                    Excel.Range rngz = ErSheet.get_Range("G" + index.ToString(), "G" + index.ToString());
+                    z = GetNumber(rngz.Text);
 
                     writer.WriteStartElement("ROW");
                     writer.WriteElementString("ID_GOODS_GLOBAL", System.Guid.NewGuid().ToString());
@@ -181,11 +199,10 @@ namespace ExcelToEpricaXML
 
                     
                     writer.WriteElementString("QTY_REMAIN", remain.ToString("0.0000").Replace(",","."));
-
-
                     writer.WriteElementString("QTY_MIN", min.ToString("0.0000").Replace(",", "."));
 
-                    writer.WriteElementString("LAST_PRICE_SAL", "0.000");
+
+                    writer.WriteElementString("LAST_PRICE_SAL", z.ToString( "0.000").Replace(",", "."));
                     writer.WriteElementString("LAST_PRICE_SUP", "0.000");
                     writer.WriteElementString("LAST_SUPPLIER_NAME", "Поставщик");
                     writer.WriteEndElement();
